@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <memory>
 
 #include "SocketSelector.h"
 
@@ -25,26 +26,34 @@ class AbstractSocket;
  */
 class NetworkReactor
 {
+    friend class std::unique_ptr<NetworkReactor>;
+
 public:
-    NetworkReactor();
-    NetworkReactor(const NetworkReactor& o)=delete;
-    ~NetworkReactor();
 
     ///Add a new socket to the reactor. If the socket already exists in, an exception will be triggered
-    inline void AddSocket(AbstractSocket* new_socket);
+    void AddSocket(AbstractSocket* new_socket);
     ///Permanantly delete a socket. It deletes the socket object too.
-    inline void RemoveSocket(AbstractSocket* sock);
+    void RemoveSocket(AbstractSocket* sock);
 
     ///This is the function to launch the network thread. After calling it, the main thread should not need to call any other methods.
     void operator()();
 
+    static NetworkReactor* GetInstance();
+    static void DeleteInstance();
+
 private:
+
+    NetworkReactor();
+    NetworkReactor(const NetworkReactor& o)=delete;
+    ~NetworkReactor();
 
     bool isServerShutdowning();
 
     std::map<int, AbstractSocket*> m_allSockets;
 
     SocketSelector m_selector;
+
+    static NetworkReactor* m_instance;
 };
 
 }

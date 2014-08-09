@@ -7,6 +7,8 @@ namespace Trillek
 namespace Network
 {
 
+NetworkReactor* NetworkReactor::m_instance = nullptr;
+
 NetworkReactor::NetworkReactor()
 {
 
@@ -20,7 +22,7 @@ NetworkReactor::~NetworkReactor()
     m_allSockets.clear();
 }
 
-inline void NetworkReactor::AddSocket(AbstractSocket *new_socket)
+void NetworkReactor::AddSocket(AbstractSocket *new_socket)
 {
     int descriptor = new_socket->getDescriptor();
     if(m_allSockets.find(descriptor) != m_allSockets.end())
@@ -78,6 +80,20 @@ void NetworkReactor::operator ()()
 bool NetworkReactor::isServerShutdowning()
 {
     return false;
+}
+
+NetworkReactor* NetworkReactor::GetInstance()
+{
+    if(m_instance == nullptr)
+        m_instance = new NetworkReactor;
+    return m_instance;
+}
+
+void NetworkReactor::DeleteInstance()
+{
+    if(m_instance != nullptr)
+        delete m_instance;
+    m_instance = nullptr;
 }
 
 }
